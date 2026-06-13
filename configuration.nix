@@ -1,0 +1,200 @@
+{ modulesPath, pkgs, inputs, config, ... }: {
+  imports = [
+    (modulesPath + "/profiles/qemu-guest.nix")
+    ./disk-config.nix
+    ./hardware-configuration.nix
+    ./minecraft.nix
+    ./lemmy.nix
+    ./glance.nix
+    ./caddy.nix
+    inputs.nix-minecraft.nixosModules.minecraft-servers
+    inputs.agenix.nixosModules.default
+    { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
+  ];
+
+  services.cockpit.enable = true;
+  services.qemuGuest.enable = true;
+  services.uptime-kuma.enable = true;
+
+  networking.firewall = {
+    enable = true;
+    allowedTCPPorts = [ 443 6167 22 8448 8008 25575 ];
+    allowedUDPPortRanges = [ ];
+  };
+
+  age.identityPaths = [ "/root/.ssh/id_ed25519" ];
+
+  users.users.root.openssh.authorizedKeys.keys = [
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKU5Apez86vNAvvkHKiAeyMOvzkC0qdabZyE1foEOqw starhaze@nixos"
+    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDpunBRSAcd2UfW1gq93xTAMDVDhD9HVWdBH1FSvjRR screamdev любит фембоев"
+  ];
+
+  users = {
+    defaultUserShell = pkgs.fish;
+    users.starhaze = {
+      isNormalUser = true;
+      description = "starhaze";
+      shell = pkgs.fish;
+      extraGroups = [ "wheel" ];
+    };
+  };
+
+  programs.fish = { enable = true; interactiveShellInit = ''set fish_greeting''; };
+
+  services.sharkey = {
+    enable = true;
+    openFirewall = false;
+
+    setupPostgresql = true;
+    setupRedis = true;
+
+    settings = {
+      url = "https://kluge.cafe";
+      port = 3000;
+      mediaDirectory = "/var/lib/sharkey/media";
+    };
+  };
+
+  age.secrets.smtp-pass = {
+    file = ./secrets/smtp-pass.age;
+    owner = "root";
+  };
+
+  services.mastodon = {
+    enable = true;
+    localDomain = "m.kluge.cafe";
+    smtp = {
+      host = "smtp-relay.brevo.com";
+      port = 587;
+      fromAddress = "noreply@kluge.cafe";
+      authenticate = true;
+      user = "a2878c001@smtp-brevo.com";
+      passwordFile = "${config.age.secrets.smtp-pass.path}";
+    };
+    streamingProcesses = 3;
+  };
+
+  services.matrix-continuwuity = {
+    enable = true;
+    settings.global = {
+      server_name = "kluge.cafe";
+      database_backend = "rocksdb";
+      allow_registration = true;
+      registration_token_required = false;
+      auto_join_rooms = [ "#space:kluge.cafe" "#announcements:kluge.cafe" ];
+    };
+  };
+
+  nix.settings.experimental-features = ["nix-command" "flakes"]; 
+
+  environment.systemPackages = with pkgs; [
+    inputs.agenix.packages.x86_64-linux.default
+    neovim
+    git
+    fishPlugins.fzf-fish
+    rclone
+    fzf
+    mcrcon
+    dart-sass
+  ];
+
+  systemd.services.backup = {
+    description = "backup (R2) script";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+      ExecStart = "/root/backup.sh";
+    };
+  };
+  
+  systemd.timers.backup = {
+    description = "backup (R2) timer";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+    };
+  };
+
+  systemd.services.backup-fi = {
+    description = "backup (FI) script";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "root";
+      ExecStart = "/root/backup-fi.sh";
+    };
+  };
+  
+  systemd.timers.backup-fi = {
+    description = "backup (FI) timer";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+    };
+  };
+
+  systemd.services.sass-watch = {
+    description = "sass watcher";
+    after = [ "network.target" ];
+    wantedBy = [ "multi-user.target" ];
+  
+    serviceConfig = {
+      Type = "simple";
+      ExecStart = "${pkgs.dart-sass}/bin/sass --watch /var/www/haze/style.scss:/var/www/haze/style.css";
+      Restart = "on-failure";
+      RestartSec = "5s";
+      User = "root";
+    };
+  };
+
+  systemd.services.mastodon-media-cleanup = {
+    description = "mastodon media cache cleanup";
+    serviceConfig = {
+      Type = "oneshot";
+      User = "mastodon";
+      ExecStart = "${pkgs.mastodon}/bin/tootctl media remove --days=3";
+      EnvironmentFile = "/var/lib/mastodon/.env.production";
+    };
+  };
+  
+  systemd.timers.mastodon-media-cleanup = {
+    description = "mastodon media cache cleanup";
+    wantedBy = [ "timers.target" ];
+    timerConfig = {
+      OnCalendar = "daily";
+      Persistent = true;
+    };
+  };
+
+  # --- ---
+
+  boot.loader.grub.enable = true;
+
+  networking.hostName = "nixos-de";
+  networking.useDHCP = false;
+  networking.interfaces.ens3 = {
+    ipv4.addresses = [{
+      address = "193.58.122.155";
+      prefixLength = 32;
+    }];
+  };
+  networking.defaultGateway = {
+    address = "10.0.0.1";
+    interface = "ens3";
+  };
+  networking.nameservers = [ "1.1.1.1" "1.0.0.1" ];
+  networking.localCommands = ''
+    ip route add 10.0.0.1/32 dev ens3 scope link || true
+  '';
+
+  services.openssh = {
+    enable = true;
+    settings = {
+      PermitRootLogin = "prohibit-password";
+      PasswordAuthentication = false;
+    };
+  };
+
+  system.stateVersion = "26.05";
+}
