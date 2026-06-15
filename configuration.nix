@@ -5,6 +5,8 @@
     ./hardware-configuration.nix
     ./minecraft.nix
     ./lemmy.nix
+    ./akkoma.nix
+    ./akkoma-blocklist.nix
     ./glance.nix
     ./caddy.nix
     inputs.nix-minecraft.nixosModules.minecraft-servers
@@ -12,7 +14,6 @@
     { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
   ];
 
-  services.cockpit.enable = true;
   services.qemuGuest.enable = true;
   services.uptime-kuma.enable = true;
 

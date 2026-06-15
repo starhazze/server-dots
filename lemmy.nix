@@ -23,12 +23,12 @@ in {
 
   virtualisation.oci-containers.containers = {
     photon = {
-      image = "ghcr.io/xyphyn/photon:latest";
+      image = "ghcr.io/xyphyn/photon:latest-node";
       ports = [ "127.0.0.1:3003:3000" ];
       environment = {
         PUBLIC_INSTANCE_URL = lemmy.domain;
         PUBLIC_SSR_ENABLED = "true";
-        PUBLIC_INTERNAL_INSTANCE = "${lemmy.ip}:${toString lemmy.port}";
+        PUBLIC_INTERNAL_INSTANCE = "https://${lemmy.domain}";
       };
     };
 
@@ -46,21 +46,34 @@ in {
     host lemmy lemmy 127.0.0.1/32 trust
   '';
 
-  services.caddy.virtualHosts."lm.kluge.cafe".extraConfig = ''
-    handle /verify_email* {
-      reverse_proxy http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
-    }
+  services.caddy.virtualHosts = {
+    "lm.kluge.cafe".extraConfig = ''
+      @ui_paths path /verify_email* /static/* /css/*
+      reverse_proxy @ui_paths http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
 
-    handle /static/* {
-      reverse_proxy http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
-    }
+      reverse_proxy 127.0.0.1:8536
+    '';
 
-    handle /css/* {
-      reverse_proxy http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
-    }
+    "lemmy.kluge.cafe".extraConfig = ''
+      file_server
+      root * /var/www/lemmy
+    '';
 
-    reverse_proxy 127.0.0.1:8536
-  '';
+    "blorp.kluge.cafe".extraConfig = ''
+      reverse_proxy 127.0.0.1:3002
+      import lemmy_routing
+    '';
+
+    "photon.kluge.cafe".extraConfig = ''
+      reverse_proxy 127.0.0.1:3003
+      import lemmy_routing
+    '';
+
+    "lemmy-ui.kluge.cafe".extraConfig = ''
+      reverse_proxy 127.0.0.1:1234
+      import lemmy_routing
+    '';
+  };
 
 
   age.secrets.lemmy-smtp.file = ./secrets/lemmy-smtp.age;

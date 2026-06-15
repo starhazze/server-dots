@@ -1,34 +1,4 @@
 { config, pkgs, lib, ... }: 
-# this and akkoma-blocklist.nix is unused for now
-let
-  akkoma = { 
-    description = ''
-      [![](https://lm.kluge.cafe/pictrs/image/a031f2c9-046f-4612-a9bb-3207b94f4754.png)](https://www.kluge.cafe/)
-      
-      Hello there and welcome to Kluge Akkoma, a yet another general-purpose akkoma instance! Please read the rules before posting anything:
-      
-      **1.** No NSFW/NSFL: This includes images or videos of gore, porn and everything like that. This also includes links to such materials in any form. Permanent ban without appeals if you're caught.
-      
-      **2.** No sexual content involving minors: Grooming, creepy behavior towards minors or ageplaying. Permanent ban without appeals if you're caught.
-      
-      **3.** No toxicity, hate speech, bigotry or slurs: Heavy toxicity, bullying, bigotry (transphobia, homophobia, racism), Nazi slogans, slurs, calls for violence are not allowed.
-      
-      **4.** No illegal content (as defined by german law): CSAM, stolen data, selling drugs etc. is not allowed. Permanent ban without appeals if you're caught.
-      
-      **5.** No doxxing: Doxxing, sharing private info, leaking DMs, phone numbers etc. is not allowed without explicit consent.
-      
-      **6.** Bots: Bots are allowed as long as you mark the account as a bot and don't constantly hammer APIs.
-      
-      **7.** No spam: Flooding timelines, mass following, posting scam links or advertising commercial products is not allowed.
-      
-      **8.** Common sense: Please use common sense. There are no "loopholes" in the rules, even if something is not listed here you can still get banned for it.
-      
-      The ToS can be found [here](https://www.kluge.cafe/tos.html), have fun! :)
-      
-      We have a matrix space at [https://matrix.to/#/#space:kluge.cafe](https://matrix.to/#/#space:kluge.cafe), feel free to join for announcements and the lounge! 
-    '';
-  };
-in
 {
   age.secrets = {
     akkoma-secret-key = {
@@ -80,16 +50,28 @@ in
   services.akkoma = {
     enable = true;
     initDb.enable = true;
+    frontends = {
+      primary = {
+        name = "pleroma-fe";
+        ref = "stable";
+      };
+      admin = {
+        name = "admin-fe";
+        ref = "stable";
+      };
+    };
     config = {
       ":pleroma" = {
-        ":configurable_from_database" = true;
         ":instance" = {
 	  name = "Kluge Akkoma";
-	  description = akkoma.description;
+	  short_description = "A small, general-purpose Akkoma instance";
+	  description = ''${config.services.akkoma.config.":pleroma".":instance".short_description}. See the full list of what other software we host <a href="https://www.kluge.cafe/" target="_blank">here :)</a>'';
 	  email = "starhazze@proton.me";
 	  notify_email = "noreply@kluge.cafe";
 	  limit = 5000;
-	  registrations_open = true;
+	  remote_limit = 15000;
+	  registrations_open = false;
+	  allow_relay = true;
 	  static_dir = "/var/lib/akkoma/mutable-static";
 	};
 
@@ -104,7 +86,7 @@ in
 	    port = 4000;
 	  };
           secret_key_base._secret = config.age.secrets.akkoma-secret-key.path;
-          signing_salt._secret    = config.age.secrets.akkoma-signing-salt.path;
+          signing_salt._secret = config.age.secrets.akkoma-signing-salt.path;
 	};
 
         "Pleroma.Emails.Mailer" = {
@@ -124,7 +106,6 @@ in
           username = "akkoma";
           database = "akkoma";
           socket_dir = "/run/postgresql";
-          # password._secret = config.age.secrets.akkoma-db-password.path;
         };
 
 	"Pleroma.Upload" = {
@@ -139,6 +120,40 @@ in
           enabled = false;
         };
       }; 
+    };
+  };
+
+  systemd.tmpfiles.settings."10-akkoma-tos" = {
+    "/var/lib/akkoma/mutable-static/instance/terms-of-service.html" = {
+      f = {
+        argument = ''
+<img width="256" src="https://www.kluge.cafe/assets/logo.png" alt="Kluge Banner">
+
+<p>Hello there and welcome to Kluge Akkoma, a yet another general-purpose akkoma instance! Please read the rules before posting anything:</p>
+
+<ol>
+    <li><b>No NSFW/NSFL:</b> This includes images or videos of gore, porn and everything like that. This also includes links to such materials in any form. Permanent ban without appeals if you're caught.</li>
+    <li><b>No sexual content involving minors:</b> Grooming, creepy behavior towards minors or ageplaying. Permanent ban without appeals if you're caught.</li>
+    <li><b>No toxicity, hate speech, bigotry or slurs:</b> Heavy toxicity, bullying, bigotry (transphobia, homophobia, racism), Nazi slogans, slurs, calls for violence are not allowed.</li>
+    <li><b>No illegal content (as defined by german law):</b> CSAM, stolen data, selling drugs etc. is not allowed. Permanent ban without appeals if you're caught.</li>
+    <li><b>No doxxing:</b> Doxxing, sharing private info, leaking DMs, phone numbers etc. is not allowed without explicit consent.</li>
+    <li><b>Bots:</b> Bots are allowed as long as you mark the account as a bot and don't constantly hammer APIs.</li>
+    <li><b>No spam:</b> Flooding timelines, mass following, posting scam links or advertising commercial products is not allowed.</li>
+    <li><b>Common sense:</b> Please use common sense. There are no "loopholes" in the rules, even if something is not listed here you can still get banned for it.</li>
+</ol>
+
+<p>The ToS can be found <a href="https://www.kluge.cafe/tos.html">here</a>, have fun! :)</p>
+
+<p>We have a matrix space at <a href="https://matrix.to/#/#space:kluge.cafe">https://matrix.to/#/#space:kluge.cafe</a>, feel free to join for announcements and the lounge!</p>
+
+<h2>Terms Of Service</h2>
+
+<p>The ToS can be found here: <a href="https://www.kluge.cafe/tos.html">https://www.kluge.cafe/tos.html</a></p>
+        '';
+        user = "akkoma";
+        group = "akkoma";
+        mode = "0644";
+      };
     };
   };
 }

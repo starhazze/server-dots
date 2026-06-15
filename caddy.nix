@@ -20,6 +20,13 @@
       acme_dns cloudflare {env.CLOUDFLARE_DNS_TOKEN}
     '';
 
+    extraConfig = ''
+      (lemmy_routing) {
+        @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
+        reverse_proxy @backend 127.0.0.1:8536
+      }
+    '';
+
     virtualHosts = {
       "haze.kluge.cafe".extraConfig = ''
         root * /var/www/haze
@@ -53,36 +60,6 @@
   
       "sharkey.lol".extraConfig = ''
         redir https://kluge.cafe{uri} permanent
-      '';
-
-      "lemmy.kluge.cafe".extraConfig = ''
-        file_server
-	root * /var/www/lemmy
-      '';
-
-      "blorp.kluge.cafe".extraConfig = ''
-        reverse_proxy 127.0.0.1:3002
-
-        @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
-        reverse_proxy @backend 127.0.0.1:8536
-      '';
-
-      "photon.kluge.cafe".extraConfig = ''
-        reverse_proxy 127.0.0.1:3003
-
-        @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
-        reverse_proxy @backend 127.0.0.1:8536
-      '';
-
-      "lemmy-ui.kluge.cafe".extraConfig = ''
-        reverse_proxy 127.0.0.1:1234
-
-        @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
-        reverse_proxy @backend 127.0.0.1:8536
-      '';
-  
-      "cockpit.maybequic.xyz".extraConfig = ''
-        reverse_proxy 127.0.0.1:9090
       '';
 
       "home.kluge.cafe".extraConfig = ''
