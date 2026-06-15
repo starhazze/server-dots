@@ -18,7 +18,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 443 6167 22 8448 8008 25575 ];
+    allowedTCPPorts = [ 443 6167 22 8448 8008 ];
     allowedUDPPortRanges = [ ];
   };
 
@@ -28,6 +28,14 @@
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKU5Apez86vNAvvkHKiAeyMOvzkC0qdabZyE1foEOqw starhaze@nixos"
     "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDpunBRSAcd2UfW1gq93xTAMDVDhD9HVWdBH1FSvjRR screamdev любит фембоев"
   ];
+
+  security.sudo = {
+    enable = true;
+    extraRules = [{
+      commands = [{ command = "ALL"; options = []; }];
+      groups = [ "wheel" ];
+    }];
+  };
 
   users = {
     defaultUserShell = pkgs.fish;
@@ -55,25 +63,6 @@
     };
   };
 
-  age.secrets.smtp-pass = {
-    file = ./secrets/smtp-pass.age;
-    owner = "root";
-  };
-
-  services.mastodon = {
-    enable = true;
-    localDomain = "m.kluge.cafe";
-    smtp = {
-      host = "smtp-relay.brevo.com";
-      port = 587;
-      fromAddress = "noreply@kluge.cafe";
-      authenticate = true;
-      user = "a2878c001@smtp-brevo.com";
-      passwordFile = "${config.age.secrets.smtp-pass.path}";
-    };
-    streamingProcesses = 3;
-  };
-
   services.matrix-continuwuity = {
     enable = true;
     settings.global = {
@@ -89,6 +78,7 @@
 
   environment.systemPackages = with pkgs; [
     inputs.agenix.packages.x86_64-linux.default
+    config.services.akkoma.package
     neovim
     git
     fishPlugins.fzf-fish

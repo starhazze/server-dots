@@ -46,6 +46,10 @@
           respond `{"m.homeserver":{"base_url":"https://matrix.kluge.cafe"}}` 200
         }
       '';
+
+      "a.kluge.cafe".extraConfig = ''
+        reverse_proxy 127.0.0.1:4000
+      '';
   
       "sharkey.lol".extraConfig = ''
         redir https://kluge.cafe{uri} permanent
@@ -61,42 +65,6 @@
 
         @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
         reverse_proxy @backend 127.0.0.1:8536
-      '';
-
-      "m.kluge.cafe".extraConfig = ''
-        handle_path /system/* {
-          file_server * {
-              root /var/lib/mastodon/public-system
-          }
-        }
-
-        handle /api/v1/streaming/* {
-          reverse_proxy  unix//run/mastodon-streaming/streaming.socket
-        }
-
-        route * {
-          file_server * {
-            root ${pkgs.mastodon}/public
-            pass_thru
-          }
-          reverse_proxy * unix//run/mastodon-web/web.socket
-        }
-
-        handle_errors {
-          root * ${pkgs.mastodon}/public
-          rewrite 500.html
-          file_server
-        }
-
-        encode gzip
-
-        header /* {
-          Strict-Transport-Security "max-age=31536000;"
-        }
-        header /emoji/* Cache-Control "public, max-age=31536000, immutable"
-        header /packs/* Cache-Control "public, max-age=31536000, immutable"
-        header /system/accounts/avatars/* Cache-Control "public, max-age=31536000, immutable"
-        header /system/media_attachments/files/* Cache-Control "public, max-age=31536000, immutable"
       '';
 
       "photon.kluge.cafe".extraConfig = ''

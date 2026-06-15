@@ -82,30 +82,11 @@ in {
       };
     };
 
-    photon-pf = {
-      image = "ghcr.io/xyphyn/photon:latest";
-      ports = [ "127.0.0.1:3004:3000" ];
-      environment = {
-        PUBLIC_INSTANCE_URL = "pf.kluge.cafe";
-        PUBLIC_SSR_ENABLED = "true";
-        PUBLIC_INTERNAL_INSTANCE = "127.0.0.1:8030";
-      };
-    };
-  
     blorp = {
       image = "ghcr.io/blorp-labs/blorp:latest";
       ports = [ "127.0.0.1:3002:80" ];
       environment = {
         REACT_APP_DEFAULT_INSTANCE = "https://lm.kluge.cafe";
-        REACT_APP_LOCK_TO_DEFAULT_INSTANCE = "1";
-      };
-    };
-
-    blorp-pf = {
-      image = "ghcr.io/blorp-labs/blorp:latest";
-      ports = [ "127.0.0.1:3005:80" ];
-      environment = {
-        REACT_APP_DEFAULT_INSTANCE = "https://pf.kluge.cafe";
         REACT_APP_LOCK_TO_DEFAULT_INSTANCE = "1";
       };
     };
@@ -181,9 +162,4 @@ in {
       chown -R lemmy:lemmy "''${dir}"
     fi
   '';
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "nodejs-14.21.3"
-    "openssl-1.1.1t"
-  ];
 }
