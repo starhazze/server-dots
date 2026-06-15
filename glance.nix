@@ -1,4 +1,4 @@
-{ pkgs, config, ... }: {
+{ pkgs, config, lib, ... }: {
   age.secrets.glance-env = {
     file = ./secrets/glance-stats-token.age;
     owner = "glance";
@@ -12,12 +12,12 @@
 
   services.glance = {
     enable = true;
+    environmentFile = "${config.age.secrets.glance-env.path}";
     settings = {
       server = {
         port = 5678;
         host = "0.0.0.0";
       };
-      environmentFile = config.age.secrets.glance-env.path;
       pages = [
         {
           name = "wellcum";
@@ -105,7 +105,7 @@
 		  type = "server-stats";
 		  servers = [
 		    { type = "local"; name = "DE"; }
-		    { type = "remote"; name = "FI"; url = "https://fi-stats.kluge.cafe"; token = "eadzrgcDc8DnLKhvyJgNkeh11+5hVbZRAXV8ZIi5PHw="; }
+		    { type = "remote"; name = "FI"; url = "\${STATS_URL}"; token = "\${STATS_TOKEN}"; }
 		  ];
 		}
               ];
