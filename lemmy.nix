@@ -51,27 +51,39 @@ in {
       @ui_paths path /verify_email* /static/* /css/*
       reverse_proxy @ui_paths http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
 
-      reverse_proxy 127.0.0.1:8536
+      reverse_proxy 127.0.0.1:${toString lemmy.port}
     '';
 
     "lemmy.kluge.cafe".extraConfig = ''
-      file_server
-      root * /var/www/lemmy
+      route {
+        import plausible lemmy.kluge.cafe
+        root * /var/www/lemmy
+        file_server
+      }
     '';
 
     "blorp.kluge.cafe".extraConfig = ''
-      reverse_proxy 127.0.0.1:3002
-      import lemmy_routing
+      route {
+        import plausible blorp.kluge.cafe
+        reverse_proxy 127.0.0.1:3002
+        import lemmy_routing
+      }
     '';
 
     "photon.kluge.cafe".extraConfig = ''
-      reverse_proxy 127.0.0.1:3003
-      import lemmy_routing
+      route {
+        import plausible photon.kluge.cafe
+        reverse_proxy 127.0.0.1:3003
+        import lemmy_routing
+      }
     '';
 
     "lemmy-ui.kluge.cafe".extraConfig = ''
-      reverse_proxy 127.0.0.1:1234
-      import lemmy_routing
+      route {
+        import plausible lemmy-ui.kluge.cafe
+        reverse_proxy 127.0.0.1:1234
+        import lemmy_routing
+      }
     '';
   };
 

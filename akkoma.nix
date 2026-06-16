@@ -108,6 +108,16 @@
           socket_dir = "/run/postgresql";
         };
 
+	":mrf" = {
+	  transparency = true;
+	  policies = [
+            {
+              _elixirType = "raw";
+              value = "Pleroma.Web.ActivityPub.MRF.SimplePolicy";
+            }
+	  ];
+	};
+
 	"Pleroma.Upload" = {
 	  base_url = "https://a.kluge.cafe/media/";
 	};

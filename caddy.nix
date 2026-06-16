@@ -10,8 +10,8 @@
     enable = true;
 
     package = pkgs.caddy.withPlugins {
-      plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" ];
-      hash = "sha256-bzMqxWTqrJ1skZmRTXyEMCKStXpljbqe5r0Ve2cnBfM=";
+      plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" "github.com/caddyserver/replace-response@v0.0.0-20241211194404-3865845790a7" ];
+      hash = "sha256-oNigcrlq09e0EW1TiZm+RPcy/5asPkgi55Q3ry2yPlM=";
     };
   
     email = "vyteshark@protonmail.com";
@@ -24,6 +24,10 @@
       (lemmy_routing) {
         @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
         reverse_proxy @backend 127.0.0.1:8536
+      }
+
+      (plausible) {
+        replace </head> `<script defer data-domain="{args[0]}" src="https://plausible.kluge.cafe/js/script.hash.tagged-events.js"></script></head>`
       }
     '';
 
@@ -39,19 +43,25 @@
       '';
 
       "kluge.cafe".extraConfig = ''
-        reverse_proxy 127.0.0.1:3000
+        route {
+          handle /.well-known/matrix/server {
+            header Content-Type application/json
+            header Access-Control-Allow-Origin *
+            respond `{"m.server":"matrix.kluge.cafe:443"}` 200
+          }
 
-        handle /.well-known/matrix/server {
-          header Content-Type application/json
-          header Access-Control-Allow-Origin *
-          respond `{"m.server":"matrix.kluge.cafe:443"}` 200
-        }
-      
-        handle /.well-known/matrix/client {
-          header Content-Type application/json
-          header Access-Control-Allow-Origin *
-          respond `{"m.homeserver":{"base_url":"https://matrix.kluge.cafe"}}` 200
-        }
+          handle /.well-known/matrix/client {
+            header Content-Type application/json
+            header Access-Control-Allow-Origin *
+            respond `{"m.homeserver":{"base_url":"https://matrix.kluge.cafe"}}` 200
+          }
+
+  	  import plausible kluge.cafe
+
+          reverse_proxy 127.0.0.1:3000 {
+            header_up -Accept-Encoding
+          }
+	}
       '';
 
       "a.kluge.cafe".extraConfig = ''
@@ -82,5 +92,4 @@
       '';
     };
   };
-  users.users.caddy.extraGroups = [ "mastodon" ];
 }

@@ -55,7 +55,7 @@
                     { title = "Chibisafe"; url = "https://safe.kluge.cafe/";  icon = "di:chibisafe"; }
                     { title = "Matrix";    url = "https://matrix.kluge.cafe/"; icon = "https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/continuwuity.svg"; }
                     { title = "Lemmy";     url = "https://lm.kluge.cafe/";    icon = "di:lemmy"; }
-                    { title = "Mastodon";  url = "https://m.kluge.cafe/";     icon = "di:mastodon"; }
+                    { title = "Plausible";  url = "https://plausible.kluge.cafe/";     icon = "di:plausible"; }
                     { title = "Sharkey";   url = "https://kluge.cafe/";      icon = "https://cdn.jsdelivr.net/gh/selfhst/icons@main/png/sharkey.png"; }
                   ];
                 }

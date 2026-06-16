@@ -9,6 +9,7 @@
     ./akkoma-blocklist.nix
     ./glance.nix
     ./caddy.nix
+    ./4get.nix
     inputs.nix-minecraft.nixosModules.minecraft-servers
     inputs.agenix.nixosModules.default
     { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
@@ -19,7 +20,7 @@
 
   networking.firewall = {
     enable = true;
-    allowedTCPPorts = [ 443 6167 22 8448 8008 ];
+    allowedTCPPorts = [ 443 22 ];
     allowedUDPPortRanges = [ ];
   };
 
@@ -136,25 +137,6 @@
       Restart = "on-failure";
       RestartSec = "5s";
       User = "root";
-    };
-  };
-
-  systemd.services.mastodon-media-cleanup = {
-    description = "mastodon media cache cleanup";
-    serviceConfig = {
-      Type = "oneshot";
-      User = "mastodon";
-      ExecStart = "${pkgs.mastodon}/bin/tootctl media remove --days=3";
-      EnvironmentFile = "/var/lib/mastodon/.env.production";
-    };
-  };
-  
-  systemd.timers.mastodon-media-cleanup = {
-    description = "mastodon media cache cleanup";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
     };
   };
 
