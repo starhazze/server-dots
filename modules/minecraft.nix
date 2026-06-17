@@ -1,7 +1,7 @@
 { config, pkgs, lib, inputs, ... }: {
 
   age.secrets.minecraft-env = {
-    file = ./secrets/minecraft-env.age;
+    file = ../secrets/minecraft-env.age;
     owner = "minecraft";
   };
 
@@ -9,6 +9,7 @@
     "minecraft-server"
   ];
 
+  # yes i run a minecraft server on prod :D
   services.minecraft-servers = {
     enable = true;
     eula = true;

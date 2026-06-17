@@ -88,9 +88,9 @@ in {
   };
 
 
-  age.secrets.lemmy-smtp.file = ./secrets/lemmy-smtp.age;
-  age.secrets.pictrs-api-key.file = ./secrets/pictrs-api-key.age;
-  age.secrets.lemmy-admin-pass.file = ./secrets/lemmy-admin-pass.age;
+  age.secrets.lemmy-smtp.file = ../secrets/lemmy-smtp.age;
+  age.secrets.pictrs-api-key.file = ../secrets/pictrs-api-key.age;
+  age.secrets.lemmy-admin-pass.file = ../secrets/lemmy-admin-pass.age;
 
   services.lemmy = {
     enable = true;

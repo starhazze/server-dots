@@ -3,13 +3,13 @@
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./hardware-configuration.nix
-    ./minecraft.nix
-    ./lemmy.nix
-    ./akkoma.nix
-    ./akkoma-blocklist.nix
-    ./glance.nix
-    ./caddy.nix
-    ./4get.nix
+    ./modules/minecraft.nix
+    ./modules/lemmy.nix
+    ./modules/akkoma.nix
+    ./modules/akkoma-blocklist.nix
+    ./modules/glance.nix
+    ./modules/caddy.nix
+    ./modules/4get.nix
     inputs.nix-minecraft.nixosModules.minecraft-servers
     inputs.agenix.nixosModules.default
     { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }

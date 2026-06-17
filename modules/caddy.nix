@@ -1,10 +1,18 @@
 { pkgs, config, ... }: {
   age.secrets.caddy-env = {
-    file = ./secrets/cloudflare-dns-token.age;
+    file = ../secrets/cloudflare-dns-token.age;
     owner = "caddy";
   };
   
   systemd.services.caddy.serviceConfig.EnvironmentFile = config.age.secrets.caddy-env.path;
+
+  users.users.caddy.extraGroups = [ "akkoma" ];
+
+  systemd.tmpfiles.rules = [
+    "d /var/lib/akkoma/uploads 0750 akkoma akkoma - -"
+    "a+ /var/lib/akkoma/uploads - - - - g:caddy:rx,d:g:caddy:r"
+  ];
+  systemd.services.caddy.serviceConfig.ReadOnlyPaths = [ "/var/lib/akkoma/uploads" ];
 
   services.caddy = {
     enable = true;
@@ -66,6 +74,15 @@
 
       "a.kluge.cafe".extraConfig = ''
         reverse_proxy 127.0.0.1:4000
+      '';
+
+      "a-img.kluge.cafe".extraConfig = ''
+        root * /var/lib/akkoma/uploads
+        file_server
+
+        header Content-Security-Policy "default-src 'none'"
+        header X-Content-Type-Options "nosniff"
+        header X-Frame-Options "DENY"
       '';
   
       "sharkey.lol".extraConfig = ''

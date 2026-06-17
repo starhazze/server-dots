@@ -1,6 +1,6 @@
 { pkgs, config, lib, ... }: {
   age.secrets.glance-env = {
-    file = ./secrets/glance-stats-token.age;
+    file = ../secrets/glance-stats-token.age;
     owner = "glance";
   };
 
