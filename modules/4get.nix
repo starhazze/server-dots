@@ -94,16 +94,4 @@ in {
       apc.shm_size = 64M
     '';
   };
-
-  services.caddy.virtualHosts."4get.kluge.cafe" = {
-    extraConfig = ''
-      root * ${webRoot}
-
-      php_fastcgi unix/${config.services.phpfpm.pools."4get".socket} {
-        try_files {path} {path}.php {path}/index.php index.php
-      }
-
-      file_server
-    '';
-  };
 }

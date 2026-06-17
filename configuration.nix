@@ -10,6 +10,7 @@
     ./modules/glance.nix
     ./modules/caddy.nix
     ./modules/4get.nix
+    ./modules/anubis.nix
     inputs.nix-minecraft.nixosModules.minecraft-servers
     inputs.agenix.nixosModules.default
     { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
