@@ -102,8 +102,9 @@ in {
 	  notify_email = "noreply@kluge.cafe";
 	  limit = 5000;
 	  remote_limit = 15000;
-	  registrations_open = false;
+	  registrations_open = true;
 	  allow_relay = true;
+	  healthcheck = true;
 	};
 
 	"Pleroma.Web.Endpoint" = {

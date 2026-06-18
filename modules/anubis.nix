@@ -5,14 +5,16 @@
     RuntimeDirectoryMode = "0755";
   };
 
-  services.anubis.instances.fourget = {
-    enable = true;
-    settings = {
-      BIND_NETWORK = "tcp";
-      BIND = "127.0.0.1:8923"; 
-      TARGET = "unix:///run/caddy/4get-backend.sock"; 
-      COOKIE_DOMAIN = "kluge.cafe";
-      SERVE_ROBOTS_TXT = true;
+  services.anubis.instances = {
+    fourget = {
+      enable = true;
+      settings = {
+        BIND_NETWORK = "tcp";
+        BIND = "127.0.0.1:8923"; 
+        TARGET = "unix:///run/caddy/4get-backend.sock"; 
+        COOKIE_DOMAIN = "kluge.cafe";
+        SERVE_ROBOTS_TXT = true;
+      };
     };
   };
 
