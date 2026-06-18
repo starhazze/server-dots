@@ -4,13 +4,18 @@
     ./disk-config.nix
     ./hardware-configuration.nix
     ./modules/minecraft.nix
+
+    ./modules/anubis.nix
+    ./modules/caddy.nix
+    ./modules/glance.nix
+
     ./modules/lemmy.nix
     ./modules/akkoma.nix
     ./modules/akkoma-blocklist.nix
-    ./modules/glance.nix
-    ./modules/caddy.nix
     ./modules/4get.nix
-    ./modules/anubis.nix
+    ./modules/sharkey.nix
+    ./modules/continuwuity.nix
+
     inputs.nix-minecraft.nixosModules.minecraft-servers
     inputs.agenix.nixosModules.default
     { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
@@ -51,31 +56,6 @@
   };
 
   programs.fish = { enable = true; interactiveShellInit = ''set fish_greeting''; };
-
-  services.sharkey = {
-    enable = true;
-    openFirewall = false;
-
-    setupPostgresql = true;
-    setupRedis = true;
-
-    settings = {
-      url = "https://kluge.cafe";
-      port = 3000;
-      mediaDirectory = "/var/lib/sharkey/media";
-    };
-  };
-
-  services.matrix-continuwuity = {
-    enable = true;
-    settings.global = {
-      server_name = "kluge.cafe";
-      database_backend = "rocksdb";
-      allow_registration = true;
-      registration_token_required = false;
-      auto_join_rooms = [ "#space:kluge.cafe" "#announcements:kluge.cafe" ];
-    };
-  };
 
   nix.settings.experimental-features = ["nix-command" "flakes"]; 
 

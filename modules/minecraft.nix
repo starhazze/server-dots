@@ -10,6 +10,7 @@
   ];
 
   # yes i run a minecraft server on prod :D
+  # gonna remove it when the project actually gets some kind of attention though
   services.minecraft-servers = {
     enable = true;
     eula = true;
