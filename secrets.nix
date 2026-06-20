@@ -12,7 +12,7 @@ in {
   "secrets/minecraft-env.age".publicKeys = [ haze server ];
   "secrets/akkoma-secret-key.age".publicKeys  = [ haze server ];
   "secrets/akkoma-signing-salt.age".publicKeys = [ haze server ];
-  "secrets/akkoma-db-password.age".publicKeys  = [ haze server ];
   "secrets/akkoma-smtp-password.age".publicKeys  = [ haze server ];
   "secrets/akkoma-cookie.age".publicKeys = [ haze server ];
+  "secrets/matrix-notify-token.age".publicKeys = [ haze server ];
 }

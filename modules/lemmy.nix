@@ -43,13 +43,15 @@ in {
   };
 
   services.postgresql.authentication = lib.mkAfter ''
-    host lemmy lemmy 127.0.0.1/32 trust
+    local lemmy lemmy peer
   '';
 
   services.caddy.virtualHosts = {
     "lm.kluge.cafe".extraConfig = ''
       @ui_paths path /verify_email* /static/* /css/*
       reverse_proxy @ui_paths http://${lemmy.ip}:${toString config.services.lemmy.ui.port}
+
+      import log lemmy-backend
 
       reverse_proxy 127.0.0.1:${toString lemmy.port}
     '';
@@ -63,6 +65,7 @@ in {
     '';
 
     "blorp.kluge.cafe".extraConfig = ''
+      import log blorp
       route {
         import plausible blorp.kluge.cafe
         reverse_proxy 127.0.0.1:3002
@@ -71,6 +74,7 @@ in {
     '';
 
     "photon.kluge.cafe".extraConfig = ''
+      import log photon
       route {
         import plausible photon.kluge.cafe
         reverse_proxy 127.0.0.1:3003
@@ -79,6 +83,7 @@ in {
     '';
 
     "lemmy-ui.kluge.cafe".extraConfig = ''
+      import log lemmy-ui
       route {
         import plausible lemmy-ui.kluge.cafe
         reverse_proxy 127.0.0.1:1234

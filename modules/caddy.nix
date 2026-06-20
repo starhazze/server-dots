@@ -30,12 +30,24 @@
 
     extraConfig = ''
       (lemmy_routing) {
+
         @backend path_regexp ^/(api|pictrs|feeds|nodeinfo|\.well-known|c/|u/|post/|comment/)/.*
         reverse_proxy @backend 127.0.0.1:8536
       }
 
       (plausible) {
         replace </head> `<script defer data-domain="{args[0]}" src="https://plausible.kluge.cafe/js/script.hash.tagged-events.js"></script></head>`
+      }
+
+      (log) {
+        log {
+          output file /var/log/caddy/{args[0]}.log {
+            roll_size 50MiB
+            roll_keep 1
+            roll_keep_for 168h
+          }
+          format json
+        }
       }
     '';
 
@@ -51,6 +63,7 @@
       '';
 
       "kluge.cafe".extraConfig = ''
+        import log sharkey
         route {
           handle /.well-known/matrix/server {
             header Content-Type application/json
@@ -73,6 +86,7 @@
       '';
 
       "a.kluge.cafe".extraConfig = ''
+        import log akkoma
         reverse_proxy 127.0.0.1:4000
       '';
 
@@ -90,6 +104,10 @@
       '';
 
       "home.kluge.cafe".extraConfig = ''
+        basicauth {
+	  starhaze $2a$14$2qp2RE3IPSLg86aPsRel7e5dkrrdpnJ./JNxaGmrWNMBdaXseH9qS
+	}
+	import log glance
         reverse_proxy 127.0.0.1:5678
       '';
   

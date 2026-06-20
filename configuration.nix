@@ -1,12 +1,14 @@
-{ modulesPath, pkgs, inputs, config, ... }: {
+{ modulesPath, pkgs, inputs, config, lib, ... }: {
   imports = [
     (modulesPath + "/profiles/qemu-guest.nix")
     ./disk-config.nix
     ./hardware-configuration.nix
-    ./modules/minecraft.nix
 
     ./modules/anubis.nix
     ./modules/caddy.nix
+    ./modules/security.nix
+    ./modules/systemd.nix
+
     ./modules/glance.nix
 
     ./modules/lemmy.nix
@@ -24,25 +26,16 @@
   services.qemuGuest.enable = true;
   services.uptime-kuma.enable = true;
 
-  networking.firewall = {
-    enable = true;
-    allowedTCPPorts = [ 443 22 ];
-    allowedUDPPortRanges = [ ];
-  };
+  # stop hanging my rebuild every-single-fucking-time please :(
+  systemd.services.dbus-broker.restartIfChanged = lib.mkForce false;
+  systemd.services.dbus-broker.reloadIfChanged = lib.mkForce false;
 
-  age.identityPaths = [ "/root/.ssh/id_ed25519" ];
-
-  users.users.root.openssh.authorizedKeys.keys = [
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKU5Apez86vNAvvkHKiAeyMOvzkC0qdabZyE1foEOqw starhaze@nixos"
-    "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDpunBRSAcd2UfW1gq93xTAMDVDhD9HVWdBH1FSvjRR screamdev любит фембоев"
-  ];
-
-  security.sudo = {
-    enable = true;
-    extraRules = [{
-      commands = [{ command = "ALL"; options = []; }];
-      groups = [ "wheel" ];
-    }];
+  services.postgresql.settings = {
+    shared_buffers = "1024MB";
+    effective_cache_size = "3GB";
+    work_mem = "4MB";
+    maintenance_work_mem = "256MB";
+    max_connections = 100;
   };
 
   users = {
@@ -53,6 +46,13 @@
       shell = pkgs.fish;
       extraGroups = [ "wheel" ];
     };
+    users.root.openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKU5Apez86vNAvvkHKiAeyMOvzkC0qdabZyE1foEOqw starhaze@nixos"
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGDpunBRSAcd2UfW1gq93xTAMDVDhD9HVWdBH1FSvjRR screamdev любит фембоев"
+    ];
+    users.starhaze.openssh.authorizedKeys.keys = [
+      "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBKU5Apez86vNAvvkHKiAeyMOvzkC0qdabZyE1foEOqw starhaze@nixos"
+    ];
   };
 
   programs.fish = { enable = true; interactiveShellInit = ''set fish_greeting''; };
@@ -69,57 +69,33 @@
     fzf
     mcrcon
     dart-sass
+    gnupg
   ];
 
-  systemd.services.backup = {
-    description = "backup (R2) script";
-    serviceConfig = {
-      Type = "oneshot";
-      User = "root";
-      ExecStart = "/root/backup.sh";
-    };
-  };
-  
-  systemd.timers.backup = {
-    description = "backup (R2) timer";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-    };
+  nix.gc = {
+    automatic = true;
+    dates = "weekly";
+    options = "--delete-older-than 14d";
   };
 
-  systemd.services.backup-fi = {
-    description = "backup (FI) script";
-    serviceConfig = {
-      Type = "oneshot";
-      User = "root";
-      ExecStart = "/root/backup-fi.sh";
-    };
-  };
-  
-  systemd.timers.backup-fi = {
-    description = "backup (FI) timer";
-    wantedBy = [ "timers.target" ];
-    timerConfig = {
-      OnCalendar = "daily";
-      Persistent = true;
-    };
-  };
-
-  systemd.services.sass-watch = {
-    description = "sass watcher";
-    after = [ "network.target" ];
-    wantedBy = [ "multi-user.target" ];
-  
-    serviceConfig = {
-      Type = "simple";
-      ExecStart = "${pkgs.dart-sass}/bin/sass --watch /var/www/haze/style.scss:/var/www/haze/style.css";
-      Restart = "on-failure";
-      RestartSec = "5s";
-      User = "root";
-    };
-  };
+  services.caddy.virtualHosts = lib.genAttrs [
+    "haze.kluge.cafe"
+    "www.kluge.cafe"
+    "kluge.cafe"
+    "a.kluge.cafe"
+    "a-img.kluge.cafe"
+    "sharkey.lol"
+    "home.kluge.cafe"
+    "kuma.kluge.cafe"
+    "matrix.kluge.cafe"
+    "lm.kluge.cafe"
+    "lemmy.kluge.cafe"
+    "blorp.kluge.cafe"
+    "photon.kluge.cafe"
+    "lemmy-ui.kluge.cafe"
+    "4get.kluge.cafe"
+    "http://:8080"
+  ] (name: { logFormat = null; });
 
   # --- ---
 
