@@ -8,6 +8,7 @@
     ./modules/caddy.nix
     ./modules/security.nix
     ./modules/systemd.nix
+    ./modules/forgejo.nix
 
     ./modules/glance.nix
 
@@ -82,6 +83,7 @@
     "haze.kluge.cafe"
     "www.kluge.cafe"
     "kluge.cafe"
+    "git.kluge.cafe"
     "a.kluge.cafe"
     "a-img.kluge.cafe"
     "sharkey.lol"

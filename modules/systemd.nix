@@ -6,6 +6,14 @@
       User = "root";
       ExecStart = "/root/backup.sh";
     };
+    path = with pkgs; [
+      gzip
+      gnupg
+      rclone
+      postgresql
+      sudo
+      gnutar
+    ];
   };
   
   systemd.timers.backup = {

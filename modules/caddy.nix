@@ -19,7 +19,7 @@
 
     package = pkgs.caddy.withPlugins {
       plugins = [ "github.com/caddy-dns/cloudflare@v0.2.4" "github.com/caddyserver/replace-response@v0.0.0-20241211194404-3865845790a7" ];
-      hash = "sha256-oNigcrlq09e0EW1TiZm+RPcy/5asPkgi55Q3ry2yPlM=";
+      hash = "sha256-ygnp+WSf02y7YsXvlkYZrN6VYsGXLTR2SbIH394dYTk=";
     };
   
     email = "vyteshark@protonmail.com";
