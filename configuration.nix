@@ -13,8 +13,6 @@
     ./modules/glance.nix
 
     ./modules/lemmy.nix
-    ./modules/akkoma.nix
-    ./modules/akkoma-blocklist.nix
     ./modules/4get.nix
     ./modules/sharkey.nix
     ./modules/continuwuity.nix

@@ -85,20 +85,6 @@
 	}
       '';
 
-      "a.kluge.cafe".extraConfig = ''
-        import log akkoma
-        reverse_proxy 127.0.0.1:4000
-      '';
-
-      "a-img.kluge.cafe".extraConfig = ''
-        root * /var/lib/akkoma/uploads
-        file_server
-
-        header Content-Security-Policy "default-src 'none'"
-        header X-Content-Type-Options "nosniff"
-        header X-Frame-Options "DENY"
-      '';
-  
       "sharkey.lol".extraConfig = ''
         redir https://kluge.cafe{uri} permanent
       '';
