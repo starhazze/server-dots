@@ -9,7 +9,7 @@
           partitions = {
             boot = {
               size = "1M";
-              type = "EF02"; # BIOS boot partition, required for GRUB on GPT
+              type = "EF02";
             };
             swap = {
               size = "4G";

@@ -3,7 +3,6 @@
 services (master branch):
 - caddy
 - sharkey
-- akkoma
 - continuwuity
 - lemmy
 - 4get + anubis
@@ -13,5 +12,3 @@ services (master branch):
 services (plausible branch):
 - plausible
 - yeah that's it
-
-we do NOT talk about modules/minecraft.nix

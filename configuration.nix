@@ -8,6 +8,7 @@
     ./modules/caddy.nix
     ./modules/security.nix
     ./modules/systemd.nix
+    ./modules/misc.nix
     ./modules/forgejo.nix
 
     ./modules/glance.nix
@@ -17,9 +18,7 @@
     ./modules/sharkey.nix
     ./modules/continuwuity.nix
 
-    inputs.nix-minecraft.nixosModules.minecraft-servers
     inputs.agenix.nixosModules.default
-    { nixpkgs.overlays = [ inputs.nix-minecraft.overlay ]; }
   ];
 
   services.qemuGuest.enable = true;
@@ -54,7 +53,19 @@
     ];
   };
 
-  programs.fish = { enable = true; interactiveShellInit = ''set fish_greeting''; };
+  programs.fish = {
+    enable = true;
+    interactiveShellInit = ''
+      set fish_greeting
+      if test -z "$ZELLIJ"
+        if zellij list-sessions 2>/dev/null | grep -q "main"
+        exec zellij attach main
+        else
+          exec zellij -n bare -s main
+        end
+      end
+    '';
+  };
 
   nix.settings.experimental-features = ["nix-command" "flakes"]; 
 
@@ -66,6 +77,7 @@
     fishPlugins.fzf-fish
     rclone
     fzf
+    zellij
     mcrcon
     dart-sass
     gnupg
